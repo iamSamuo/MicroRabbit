@@ -12,7 +12,7 @@ namespace MicroRabbit.Domain.Core.Bus
     {
         Task SendCommand<T>(T command) where T : Command;
         // used @event because event is a reserved keyword in C#
-        void Publish<T>(T @event) where T : Event;
+        Task Publish<T>(T @event) where T : Event;
         // where is used to specify constraints on the type parameters. In this case, T must be a type that inherits from Event, and TH must be a type that implements IEventHandler<T>.
         void Subscribe<T, TH>()
                 where T : Event
