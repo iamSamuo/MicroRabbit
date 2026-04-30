@@ -2,37 +2,29 @@
 using MicroRabbit.Domain.Core.Bus;
 using MicroRabbit.Domain.Core.Commands;
 using MicroRabbit.Domain.Core.Events;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace MicroRabbit.Infra.Bus
 {
-    // sealed prevents other clases from inheriting from this class.
-    // This is useful when you want to create a class that cannot be extended or modified by other classes.
-    // In this case, it ensures that the RabbitMQBus class cannot be subclassed, which can help to maintain the integrity and security of the messaging system.
-    public sealed class RabbitMQBus : IEventBus
-    {
-        private readonly IMediator _mediator;
-        private readonly Dictionary<string, List<Type>> _handlers;
-        private readonly List<Type> _eventTypes;
-        private readonly ILogger<RabbitMQBus> logger;
-
-        public RabbitMQBus(IMediator mediator)
+        public sealed class RabbitMQBus : IEventBus
         {
-            _mediator = mediator;
-            _handlers = new Dictionary<string, List<Type>>();
-            _eventTypes = new List<Type>();
+            private readonly IMediator _mediator;
+            private readonly Dictionary<string, List<Type>> _handlers;
+            private readonly List<Type> _eventTypes;
+            private readonly ILogger<RabbitMQBus> _logger; 
+            public RabbitMQBus(IMediator mediator, ILogger<RabbitMQBus> logger) 
+            {
+                _mediator = mediator;
+                _logger = logger; 
+                _handlers = new Dictionary<string, List<Type>>();
+                _eventTypes = new List<Type>();
+            }
 
-        }
-
-        public Task SendCommand<T>(T command) where T : Command
+            public Task SendCommand<T>(T command) where T : Command
         {
             return _mediator.Send(command);
         }
@@ -63,11 +55,11 @@ namespace MicroRabbit.Infra.Bus
                     body: body
                     );
 
-                logger.LogInformation("Published event {EventType} to queue {Queue}", typeof(T).Name, eventName);
+                _logger.LogInformation("Published event {EventType} to queue {Queue}", typeof(T).Name, eventName);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to publish event {EventType}", typeof(T).Name);
+                _logger.LogError(ex, "Failed to publish event {EventType}", typeof(T).Name);
                 throw;
             }
         }
@@ -141,7 +133,7 @@ namespace MicroRabbit.Infra.Bus
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error processing message {Message} for event {EventName}", message, eventName);
+                _logger.LogError(ex, "Error processing message {Message} for event {EventName}", message, eventName);
                 // Optionally, you can implement retry logic or move the message to a dead-letter queue here.
             }
         }
