@@ -12,7 +12,6 @@
     <Folder Include="Events\" />
     <Folder Include="EventHandles\" />
     <Folder Include="Interfaces\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

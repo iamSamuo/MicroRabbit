@@ -1,10 +1,10 @@
 ﻿using MediatR;
-using MicroRabbit.Banking.Data.Context;
 using MicroRabbit.Infra.IoC;
+using MicroRabbit.Transfer.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-namespace MicroRabbit.Banking.Api;
+namespace MicroRabbit.Transfer.Api;
 public class Startup
 {
     public Startup(IConfiguration configuration)
@@ -13,19 +13,13 @@ public class Startup
     }
 
     public IConfiguration Configuration { get; }
-    
-    
-    private void RegisterServices(IServiceCollection services)
-    {
-        DependencyContainer.RegisterServices(services);
-    }
 
     public void ConfigureServices(IServiceCollection services)
     {
 
-        services.AddDbContext<BankingDbContext>(options =>
+        services.AddDbContext<TransferDbContext>(options =>
         {
-            options.UseSqlServer(Configuration.GetConnectionString("BankingDbConnection"));
+            options.UseSqlServer(Configuration.GetConnectionString("TransferDbConnection"));
         });
 
         services.AddControllers();
@@ -40,13 +34,15 @@ public class Startup
             });
         });
 
-        // confiure mediatR
         services.AddMediatR(typeof(Startup));
 
         RegisterServices(services);
     }
 
-
+    private void RegisterServices(IServiceCollection services)
+    {
+        DependencyContainer.RegisterServices(services);
+    }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
@@ -63,8 +59,6 @@ public class Startup
         app.UseHttpsRedirection();
 
         app.UseSwagger();
-
-        // swagger UI configuration
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Banking Microserveice V1"));
 
         app.UseRouting();
